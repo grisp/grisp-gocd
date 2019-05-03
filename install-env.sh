@@ -24,7 +24,7 @@ fi
 asdf plugin-update erlang
 asdf plugin-update rebar
 
-asdf install erlang $
+asdf install erlang $1
 
 asdf install erlang 17.5.6.9
 asdf global erlang 17.5.6.9
