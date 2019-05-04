@@ -2,8 +2,6 @@
 
 set -euxo pipefail
 
-cd grisp-software
-
 GRISP_TOOLCHAIN_REVISION=$(cat rtems-install/rtems/5/GRISP_TOOLCHAIN_REVISION)
 ARCHIVENAME=grisp_toolchain_arm-rtems5_Linux_$GRISP_TOOLCHAIN_REVISION.tar.gz
 COUNT=$(aws s3 ls s3://grisp/platforms/grisp_base/toolchain/$ARCHIVENAME | wc -l)
