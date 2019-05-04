@@ -25,3 +25,7 @@ If `BUILD` is set to `true` the OTP package will be inside `$BUILDDIR/ciproject/
 
 Expects toolchain to reside in `grisp-software/rtems-install/`.
 
+`deploy-otp.sh`
+---------------
+
+Expects OTP package within `ciproject/_grisp/otp`.

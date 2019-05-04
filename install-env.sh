@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -euxo pipefail
 
 # asdf installed
 if cd ~/.asdf; then

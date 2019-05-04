@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euxo pipefail
+
 BUILDDIR=$PWD
 $HOME/.asdf/asdf.sh
 
@@ -31,7 +33,7 @@ rebar3 new grispapp ciproject dest=/tmp/ciproject
 # otherwise use hex version
 if [[ $3 == "true" ]]; then
     mkdir $BUILDDIR/_checkouts
-    ln -s $BUILDDIR/ciproject/_checkouts/grisp $BUILDDIR/grisp
+    ln -s $BUILDDIR/grisp $BUILDDIR/ciproject/_checkouts/grisp
 fi
 
 cd $BUILDDIR/ciproject
@@ -49,3 +51,5 @@ if [[ $4 == "true" ]]; then
 fi
 
 rebar3 grisp deploy -v 0.1.0 -n ciproject
+
+rm -r /tmp/ciproject
