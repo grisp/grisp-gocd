@@ -28,4 +28,4 @@ Expects toolchain to reside in `grisp-software/rtems-install/`.
 `deploy-otp.sh`
 ---------------
 
-Expects OTP package within `ciproject/_grisp/otp`.
+Expects OTP package within root of builddir
