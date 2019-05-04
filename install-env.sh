@@ -2,6 +2,8 @@
 
 set -euxo pipefail
 
+GO_PWD=$PWD
+
 # asdf installed
 if cd ~/.asdf; then
     git pull origin master
@@ -32,5 +34,6 @@ asdf global erlang 17.5.6.9
 # build rebar3 with old erlang so it works with any OTP release
 asdf install rebar $2
 
-asdf global erlang $1
-asdf global rebar $1
+cd $GO_PWD
+asdf local erlang $1
+asdf local rebar $2
