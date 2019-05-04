@@ -19,3 +19,9 @@ Make sure `asdf` is installed and the required tool versions.
 - `BUILD`: `true` or `false`
 
 If `BUILD` is set to `true` the OTP package will be inside `$BUILDDIR/ciproject/otp/*/package/*.tar.gz`.
+
+`deploy-toolchain.sh`
+------------------
+
+Expects toolchain to reside in `grisp-software/rtems-install/`.
+
