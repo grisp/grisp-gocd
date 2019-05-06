@@ -4,7 +4,7 @@ set -euxo pipefail
 
 cd grisp-software
 rm -rf /opt/grisp
-SHORT_SHA1=$(echo "$GO_REVISION_GITHUB" | cut -c 1-10)
+SHORT_SHA1=$(echo "$GO_REVISION_GRISP_SOFTWARE" | cut -c 1-10)
 TOOLCHAIN_BASE_PATH="/opt/grisp/grisp-software/grisp-base"
 TOOLCHAIN_PATH="$TOOLCHAIN_BASE_PATH/$SHORT_SHA1"
 GO_PWD=$PWD
