@@ -12,7 +12,7 @@ else
 fi
 git -C ~/.asdf checkout "$(git describe --abbrev=0 --tags)"
 
-$HOME/.asdf/asdf.sh
+source $HOME/.asdf/asdf.sh
 
 # Erlang plugin installed
 if [ $(asdf plugin-list | grep -c "erlang") -eq 0 ]; then
