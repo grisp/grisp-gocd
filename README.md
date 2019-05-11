@@ -1,31 +1,52 @@
 Build Scripts for Grisp GOCD Pipelines
 ======================================
 
-`install-env.sh`
-------------------
+Templates:
+-----------
 
-Make sure `asdf` is installed and the required tool versions.
-`install-env.sh ERLANG_VERSION REBAR_VERSION`
+### grisp-software
 
+Expected Materials:
 
-`grisp-project.sh`
---------------------
+* grisp-gocd in `.gocd/`
+* grisp-software in `grisp-software/`
 
-`grisp-project.sh REBAR3_GRISP_VERSION TOOLCHAIN_REVISION LINK_GRISP BUILD`
+Artifacts:
 
-- `REBAR3_GRISP_VERSION` can be `hex` or git hash
-- `TOOLCHAIN_REVISION`: `HEAD` or git hash
-- `LINK_GRISP`: `true` or `false`. Link `grisp/` to `ciproject/_checkouts`
-- `BUILD`: `true` or `false`
+* `grisp_toolchain*.tar.gz`
+* `grisp-software/rtems-source-builder/rtems/rsb-report*`
 
-If `BUILD` is set to `true` the OTP package will be inside `$BUILDDIR/ciproject/otp/*/package/*.tar.gz`.
+Single stage/job/task: `build-toolchain.sh`
 
-`deploy-toolchain.sh`
-------------------
+### grisp
 
-Expects toolchain to reside in `grisp-software/rtems-install/`.
+Expected Materials:
 
-`deploy-otp.sh`
----------------
+* Pipeline: `grisp-software/`
+* grisp-gocd in `.gocd`
+* grisp in `grisp/`
+* rebar3_grisp in `rebar3_grisp`
 
-Expects OTP package within root of builddir
+Artifacts:
+
+* OTP
+* GRiSP-Release
+
+If material `grisp-software` has changed pull Artifact via URL, else get latest master from S3.
+
+`install-env.sh` all required Erlang versions
+
+`grisp-project.sh`: Build OTP release with all possible Erlang versions:
+
+* set `asdf local erlang`
+* `rebar3 grisp build`
+* mv OTP tar to buildroot
+* `rebar3 grisp deploy`
+* archive grispproject to buildroot
+* `rm -r _build _grisp`
+
+| Changed        | toolchain | grisp | rebar3-grisp |
+|----------------|-----------|-------|--------------|
+| grisp-software | HEAD      | hex   | hex          |
+| grisp          | master    | HEAD  | hex          |
+| rebar3_grisp   | master    | hex   | HEAD         |

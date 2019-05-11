@@ -2,6 +2,8 @@
 
 set -euxo pipefail
 
+GO_PWD=$PWD
+
 # workaround for https://github.com/ashwanthkumar/gocd-build-github-pull-requests/issues/133
 GRISP_SOFTWARE_REV=${GO_REVISION_GRISP_SOFTWARE:-$GO_SCM_GRISP_SOFTWARE_LABEL}
 
@@ -16,4 +18,9 @@ ln -s $GO_PWD $TOOLCHAIN_PATH
 cd $TOOLCHAIN_PATH
 ./build/build.sh
 echo "OK" > rtems-source-builder/rtems/rsb-report-ok
+
+# create archive
+ARCHIVENAME=grisp_toolchain_arm-rtems5_Linux_$GRISP_SOFTWARE_REV.tar.gz
+tar -czf $GO_PWD/ARCHIVENAME --include="$TOOLCHAIN_PATH/rtems-install/*" /
+
 rm -rf /opt/grisp
