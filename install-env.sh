@@ -29,10 +29,7 @@ fi
 asdf plugin-update erlang
 asdf plugin-update rebar
 
-asdf install erlang $1
-
 asdf install erlang 19.0
 asdf global erlang 19.0
 # build rebar3 with old erlang so it works with any OTP release
-asdf install rebar $2
-
+asdf install rebar 3.10.0
