@@ -20,7 +20,8 @@ cd $TOOLCHAIN_PATH
 echo "OK" > rtems-source-builder/rtems/rsb-report-ok
 
 # create archive
+cd /
 ARCHIVENAME=grisp_toolchain_arm-rtems5_Linux_$GRISP_SOFTWARE_REV.tar.gz
-tar -czf $GO_PWD/ARCHIVENAME --include="$TOOLCHAIN_PATH/rtems-install/*" /
+tar -czf $GO_PWD/ARCHIVENAME $TOOLCHAIN_PATH/rtems-install
 
 rm -rf /opt/grisp
