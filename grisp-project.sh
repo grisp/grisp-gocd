@@ -9,6 +9,7 @@ set +u; source $HOME/.asdf/asdf.sh; set -u
 while read v; do # foreach erlang version
     asdf install erlang "$v"
     asdf local erlang "$v"
+    asdf local rebar 3.10.0
 
     # get rid of rebar3 cache
     rm -rf ~/.cache/rebar3/
