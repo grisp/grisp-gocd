@@ -31,7 +31,7 @@ while read v; do # foreach erlang version
     ## TODO install custom version of rebar3 plugin. symlink it in ~/.cache/rebar3/plugins
 
     mkdir $BUILDDIR/grisp_release
-    DEBUG=1; rebar3 new grispapp ciproject dest=$BUILDDIR/grisp_release
+    DEBUG=1; rebar3 new grispapp name=ciproject dest=$BUILDDIR/grisp_release
     cd $BUILDDIR/ciproject
 
     if $GO_MATERIAL_GRISP_HAS_CHANGED; then # build otp
