@@ -3,7 +3,8 @@
 set -euxo pipefail
 
 BUILDDIR=$PWD
-$HOME/.asdf/asdf.sh
+
+set +u; source $HOME/.asdf/asdf.sh; set -u
 
 while read v; do # foreach erlang version
     asdf install erlang "$v"
