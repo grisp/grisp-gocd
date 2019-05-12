@@ -14,6 +14,7 @@ while read v; do # foreach erlang version
     rm -rf ~/.cache/rebar3/
 
     # install rebar3_grisp globally
+    mkdir -p ~/.config/rebar3
     echo '{plugins, [rebar3_hex, rebar3_grisp]}.' > ~/.config/rebar3/rebar.config
 
     cd /
