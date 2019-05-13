@@ -8,12 +8,12 @@ set +u; source $HOME/.asdf/asdf.sh; set -u
 
 while read v; do # foreach erlang version
     rm -rf /opt/grisp
+    # get rid of rebar3 cache
+    rm -rf ~/.cache/rebar3/
+
     asdf install erlang "$v"
     asdf local erlang "$v"
     asdf local rebar 3.10.0
-
-    # get rid of rebar3 cache
-    rm -rf ~/.cache/rebar3/
 
     # install rebar3_grisp globally
     mkdir -p ~/.config/rebar3
@@ -47,7 +47,8 @@ while read v; do # foreach erlang version
     erl -noshell -eval '{ok, Config} = file:consult("rebar.config"),
                         {value, {grisp, GrispConfig}} = lists:keysearch(grisp, 1, Config),
                         NewGrispConfig = GrispConfig ++ [{build, [{toolchain, [{directory, "'${TC_PATH[@]}'"}]}]}],
-                        NewConfig = lists:keyreplace(grisp, 1, Config, {grisp, NewGrispConfig}),
+                        NewGrispConfig2 = lists:keyreplace(otp, 1, NewGrispConfig, {otp, [{version, "'$v'"}]}),
+                        NewConfig = lists:keyreplace(grisp, 1, Config, {grisp, NewGrispConfig2}),
                         file:write_file("rebar.config", lists:map(fun (E) -> io_lib:format("~p.~n", [E]) end, NewConfig)).' -s init stop
 
     # build grispapp
