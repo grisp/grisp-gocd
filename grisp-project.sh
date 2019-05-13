@@ -47,7 +47,7 @@ while read -u10 v; do # we read from filenumber ten (stdin is used somwhere with
     TC_PATH=( /opt/grisp/grisp-software/grisp-base/*/rtems-install/rtems/5 )
     erl -noshell -eval '{ok, Config} = file:consult("rebar.config"),
                         {value, {grisp, GrispConfig}} = lists:keysearch(grisp, 1, Config),
-                        NewGrispConfig = GrispConfig ++ [{build, [{toolchain, [{directory, "'"${TC_PATH[1]}"'"}]}]}],
+                        NewGrispConfig = GrispConfig ++ [{build, [{toolchain, [{directory, "'${TC_PATH[@]}'"}]}]}],
                         NewGrispConfig2 = lists:keyreplace(otp, 1, NewGrispConfig, {otp, [{version, "'"$v"'"}]}),
                         NewConfig = lists:keyreplace(grisp, 1, Config, {grisp, NewGrispConfig2}),
                         file:write_file("rebar.config", lists:map(fun (E) -> io_lib:format("~p.~n", [E]) end, NewConfig)).' -s init stop
