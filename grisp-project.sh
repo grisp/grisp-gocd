@@ -6,8 +6,8 @@ BUILDDIR=$PWD
 
 set +u; source $HOME/.asdf/asdf.sh; set -u
 
-while read v; do # foreach erlang version
-    cd $BUILDDIR
+while read -u10 v; do # we read from filenumber ten (stdin is used somwhere within while...)
+    cd "$BUILDDIR"
     rm -rf /opt/grisp
     # get rid of rebar3 cache
     rm -rf ~/.cache/rebar3/
@@ -61,6 +61,6 @@ while read v; do # foreach erlang version
     cd $BUILDDIR/grisp_release
     tar -czf $BUILDDIR/grisp_release_$v.tar.gz .
 
-    rm -rf $BUILDDIR/grisp_release $BUILDDIR/ciproject
-    cd $BUILDDIR
-done < .gocd/erlang_versions
+    rm -rf "$BUILDDIR"/grisp_release "$BUILDDIR"/ciproject
+    cd "$BUILDDIR"
+done 10< .gocd/erlang_versions
