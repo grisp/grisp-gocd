@@ -2,8 +2,6 @@
 
 set -euxo pipefail
 
-GO_PWD=$PWD
-
 # asdf installed
 if cd ~/.asdf; then
     git pull origin master
@@ -13,16 +11,16 @@ fi
 git -C ~/.asdf checkout "$(git describe --abbrev=0 --tags)"
 
 set +u
-source $HOME/.asdf/asdf.sh
+source "$HOME"/.asdf/asdf.sh
 set -u
 
 # Erlang plugin installed
-if [ $(asdf plugin-list | grep -c "erlang") -eq 0 ]; then
+if [ "$(asdf plugin-list | grep -c 'erlang')" -eq 0 ]; then
     asdf plugin-add erlang
 fi
 
 # Rebar plugin installed
-if [ $(asdf plugin-list | grep -c "rebar") -eq 0 ]; then
+if [ "$(asdf plugin-list | grep -c 'rebar')" -eq 0 ]; then
     asdf plugin-add rebar https://github.com/Stratus3D/asdf-rebar.git
 fi
 
