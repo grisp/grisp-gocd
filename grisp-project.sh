@@ -7,6 +7,7 @@ BUILDDIR=$PWD
 set +u; source $HOME/.asdf/asdf.sh; set -u
 
 while read v; do # foreach erlang version
+    rm -rf /opt/grisp
     asdf install erlang "$v"
     asdf local erlang "$v"
     asdf local rebar 3.10.0
@@ -31,7 +32,8 @@ while read v; do # foreach erlang version
     ## TODO install custom version of rebar3 plugin. symlink it in ~/.cache/rebar3/plugins
 
     mkdir $BUILDDIR/grisp_release
-    DEBUG=1; rebar3 new grispapp name=ciproject dest=$BUILDDIR/grisp_release
+    cd $BUILDDIR
+    DEBUG=1 rebar3 new grispapp name=ciproject dest=$BUILDDIR/grisp_release
     cd $BUILDDIR/ciproject
 
     if $GO_MATERIAL_GRISP_HAS_CHANGED; then # build otp
