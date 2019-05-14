@@ -21,7 +21,7 @@ while read -u10 v; do # we read from filenumber ten (stdin is used somwhere with
     echo '{plugins, [rebar3_hex, rebar3_grisp]}.' > ~/.config/rebar3/rebar.config
 
     cd /
-    if $GO_MATERIAL_GRISP_SOFTWARE_HAS_CHANGED; then
+    if [[ $GO_PIPELINE_NAME == "grisp-new-toolchain" ]]; then
         # use version from fetched artifact
         tar -xzf "$BUILDDIR"/toolchain/grisp_toolchain*.tar.gz
     else
