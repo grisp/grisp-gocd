@@ -22,20 +22,9 @@ while read -u10 v; do # we read from filenumber ten (stdin is used somwhere with
 
     mkdir -p "$BUILDDIR"/toolchain
     if [[ $GO_PIPELINE_NAME == "grisp-new-toolchain" ]]; then
-        # get toolchain from upstream artifact
-        # we want to reuse the template and there are no conditionals in gocd config
-        # so we use the api:
-        cd "$BUILDDIR"/toolchain
-        TOOLCHAIN_REVISION=$(curl "https://public.ci.stritzinger.com/go/files/$GO_DEPENDENCY_LABEL_GRISP_SOFTWARE/build.sh/toolchain/TOOLCHAIN_REVISION" \
-             -H "Authorization: bearer $GO_API_TOKEN")
-
-        TOOLCHAIN_NAME="grisp_toolchain_arm-rtems5_Linux_$TOOLCHAIN_REVISION.tar.gz"
-        wget "https://public.ci.stritzinger.com/go/files/$GO_DEPENDENCY_LABEL_GRISP_SOFTWARE/build.sh/toolchain/$TOOLCHAIN_NAME" \
-             -H "Authorization: bearer $GO_API_TOKEN"
-
         # use version from fetched artifact
         cd /
-        tar -xzf "$BUILDDIR"/toolchain/grisp_toolchain*.tar.gz
+        tar -xzf "$BUILDDIR"/grisp_toolchain*.tar.gz
     else
         # fetch master rev from s3
         GRISP_TOOLCHAIN_REVISION=$(git ls-remote -h https://github.com/grisp/grisp-software master | awk '{print $1}')
