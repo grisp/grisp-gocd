@@ -24,7 +24,7 @@ while read -u10 v; do # we read from filenumber ten (stdin is used somwhere with
     if [[ $GO_PIPELINE_NAME == "grisp-new-toolchain" ]]; then
         # use version from fetched artifact
         cd /
-        tar -xzf "$BUILDDIR"/grisp_toolchain*.tar.gz
+        tar -xzf "$BUILDDIR"/toolchain/grisp_toolchain*.tar.gz
     else
         # fetch master rev from s3
         GRISP_TOOLCHAIN_REVISION=$(git ls-remote -h https://github.com/grisp/grisp-software master | awk '{print $1}')
