@@ -50,3 +50,13 @@ If material `grisp-software` has changed pull Artifact via URL, else get latest 
 | grisp-software | HEAD      | hex   | hex          |
 | grisp          | master    | HEAD  | hex          |
 | rebar3_grisp   | master    | hex   | HEAD         |
+
+
+grisp-project.sh
+-----------------
+
+Options:
+
+- `--use-grisp-material`: Will link the grisp material into the `_checkouts` directory
+- `--erlang-version 21.0`: Only test with OTP 21.0
+- `--use-rebar3-grisp-material`: Will globally install the grisp plugin provided by a material

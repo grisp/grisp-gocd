@@ -6,7 +6,32 @@ BUILDDIR=$PWD
 
 set +u; source "$HOME"/.asdf/asdf.sh; set -u
 
-while read -u10 v; do # we read from filenumber ten (stdin is used somwhere within while...)
+ERLANG_VERSIONS=$(cat .gocd/erlang_versions)
+
+USE_GRISP_MATERIAL=false
+USE_REBAR3_GRISP_MATERIAL=false
+
+while test $# -gt 0; do
+    case "$1" in
+        --use-grisp-material)
+            shift
+            USE_GRISP_MATERIAL=true
+            ;;
+        --erlang-version)
+            shift
+            ERLANG_VERSIONS=$1
+            ;;
+        --use-rebar3-grisp-material)
+            shift
+            USE_REBAR3_GRISP_MATERIAL=true
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
+
+for v in $ERLANG_VERSIONS; do
     cd "$BUILDDIR"
     rm -rf /opt/grisp
     # get rid of rebar3 cache
@@ -32,14 +57,19 @@ while read -u10 v; do # we read from filenumber ten (stdin is used somwhere with
         curl -L https://s3.amazonaws.com/grisp/platforms/grisp_base/toolchain/grisp_toolchain_arm-rtems5_Linux_"${GRISP_TOOLCHAIN_REVISION}".tar.gz | tar -xz
     fi
 
-    ## TODO install custom version of rebar3 plugin. symlink it in ~/.cache/rebar3/plugins
+    # install custom version of rebar3 plugin. symlink it in ~/.cache/rebar3/plugins
+    if [[ "$USE_REBAR3_GRISP_MATERIAL" = true ]]; then
+        mkdir ~/.cache/rebar3/plugins
+        ln -s "$BUILDDIR"/rebar3_grisp ~/.cache/rebar3/plugins
+    fi
+
 
     mkdir "$BUILDDIR"/grisp_release
     cd "$BUILDDIR"
     DEBUG=1 rebar3 new grispapp name=ciproject dest="$BUILDDIR"/grisp_release
     cd "$BUILDDIR"/ciproject
 
-    if [[ $GO_PIPELINE_NAME == "grisp" ]]; then
+    if [[ "$USE_GRISP_MATERIAL" = true ]]; then
         # link grisp into _checkouts directory
         mkdir "$BUILDDIR"/ciproject/_checkouts
         ln -s "$BUILDDIR"/grisp "$BUILDDIR"/ciproject/_checkouts/grisp
@@ -65,4 +95,4 @@ while read -u10 v; do # we read from filenumber ten (stdin is used somwhere with
 
     rm -rf "$BUILDDIR"/grisp_release "$BUILDDIR"/ciproject
     cd "$BUILDDIR"
-done 10< .gocd/erlang_versions
+done
