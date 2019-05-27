@@ -59,7 +59,7 @@ for v in $ERLANG_VERSIONS; do
 
     # install custom version of rebar3 plugin. symlink it in ~/.cache/rebar3/plugins
     if [[ "$USE_REBAR3_GRISP_MATERIAL" = true ]]; then
-        mkdir ~/.cache/rebar3/plugins
+        mkdir -p ~/.cache/rebar3/plugins
         ln -s "$BUILDDIR"/rebar3_grisp ~/.cache/rebar3/plugins
     fi
 
