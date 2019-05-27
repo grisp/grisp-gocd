@@ -43,7 +43,7 @@ for v in $ERLANG_VERSIONS; do
 
     # install rebar3_grisp globally
     mkdir -p ~/.config/rebar3
-    echo '{plugins, [rebar3_hex, rebar3_grisp]}.' > ~/.config/rebar3/rebar.config
+    echo '{plugins, [rebar3_hex, grisp_tools, rebar3_grisp]}.' > ~/.config/rebar3/rebar.config
 
     mkdir -p "$BUILDDIR"/toolchain
     if [[ $GO_PIPELINE_NAME == "grisp-new-toolchain" ]]; then
