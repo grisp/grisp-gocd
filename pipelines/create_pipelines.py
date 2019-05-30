@@ -24,14 +24,14 @@ grisp_matrix={
     },
     "rebar3-grisp-master-tools-master": {
         "versions": ["21.0"],
-        "grisp_material": False,
+        "grisp_material": True,
         "rebar3_grisp_material": True,
         "grisp_tools_material": True,
         "fetch_toolchain": False
     },
     "rebar3-grisp-master-tools-hex": {
         "versions": ["21.0"],
-        "grisp_material": False,
+        "grisp_material": True,
         "rebar3_grisp_material": True,
         "grisp_tools_material": False,
         "fetch_toolchain": False
