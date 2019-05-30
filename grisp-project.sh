@@ -25,6 +25,10 @@ while test $# -gt 0; do
             shift
             USE_REBAR3_GRISP_MATERIAL=true
             ;;
+        --use-grisp-tools-material)
+            shift
+            USE_GRISP_TOOLS_MATERIAL=true
+            ;;
         *)
             break
             ;;
@@ -61,6 +65,11 @@ for v in $ERLANG_VERSIONS; do
     if [[ "$USE_REBAR3_GRISP_MATERIAL" = true ]]; then
         mkdir -p ~/.cache/rebar3/plugins
         ln -s "$BUILDDIR"/rebar3_grisp ~/.cache/rebar3/plugins
+    fi
+
+    if [[ "$USE_GRISP_TOOLS_MATERIAL" = true ]]; then
+        mkdir -p ~/.cache/rebar3/plugins
+        ln -s "$BUILDDIR"/grisp_tools ~/.cache/rebar3/plugins
     fi
 
 
