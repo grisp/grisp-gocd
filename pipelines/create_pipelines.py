@@ -48,6 +48,7 @@ grisp_matrix={
 env = jinja2.Environment(loader = jinja2.FileSystemLoader(os.path.abspath('.')))
 
 def create_pipeline(template, pipeline_name, data):
+    print(data)
     template = env.get_template(os.path.join('pipelines', 'templates', template))
     pipeline_json = template.render(**data)
     with open(os.path.join(config_repo_dir, pipeline_name + ".gopipeline.json"), "w") as pipeline:
@@ -55,7 +56,7 @@ def create_pipeline(template, pipeline_name, data):
     json.loads(pipeline_json) # check if it's valid json
 
 def get_grisp_pipeline_name(pipeline_type, otp_version):
-    return "grisp-"+pipeline_type+"-otp-"+v
+    return "grisp-"+pipeline_type+"-otp-"+otp_version
 
 # grisp pipelines:
 for pipeline_type, item in grisp_matrix.items():
@@ -72,17 +73,17 @@ for pipeline_type, item in grisp_matrix.items():
                             "fetch_toolchain" : item["fetch_toolchain"]
                         }
         )
-
 create_pipeline('deploy-otp-to-s3.j2.gopipeline.json',
                 'deploy-otp-to-s3',
                 # all otp versions as upstream pipelines
-                { 'erlang_versions' : grisp_matrix["grisp"]["versions"] }
+                { 'upstream_pipelines' :
+                  [ get_grisp_pipeline_name('grisp', v) for v in grisp_matrix["grisp"]["versions"] ]
+                }
 )
 
 create_pipeline('deploy-toolchain-to-s3.j2.gopipeline.json',
                 'deploy-toolchain-to-s3',
                 { 'upstream_pipelines' :
-                  map(lambda v : get_grisp_pipeline_name('new-toolchain', v),
-                      grisp_matrix['new-toolchain']['versions'])
+                  [ get_grisp_pipeline_name('new-toolchain', v) for v in grisp_matrix['new-toolchain']['versions'] ]
                 }
 )

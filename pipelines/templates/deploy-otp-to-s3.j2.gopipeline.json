@@ -15,11 +15,11 @@
     ],
     "parameters": [],
     "materials": [
-        {% for version in erlang_versions %}
+        {% for name in upstream_pipelines %}
         {
-            "pipeline": "grisp-otp-{{ version }}",
+            "pipeline": "{{ name }}",
             "stage": "build",
-            "name": "grisp",
+            "name": "{{ name }}",
             "type": "dependency"
         },
         {% endfor %}
@@ -66,12 +66,12 @@
                     "run_instance_count": "0",
                     "timeout": 0.0,
                     "tasks": [
-                        {% for version in erlang_versions %}
+                        {% for name in upstream_pipelines %}
                         {
                             "source": "otp",
                             "is_source_a_file": false,
                             "destination": "",
-                            "pipeline": "grisp-otp-{{ version }}",
+                            "pipeline": "{{ name }}",
                             "stage": "build",
                             "job": "build_grisp_project",
                             "artifact_origin": "gocd",

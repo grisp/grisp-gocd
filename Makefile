@@ -4,3 +4,4 @@ all:
 clean:
 	git -C ../grisp-gocd-config reset HEAD
 	rm -vf ../grisp-gocd-config/*.json
+	git -C ../grisp-gocd-config/ checkout -- \*
