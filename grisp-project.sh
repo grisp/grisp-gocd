@@ -13,8 +13,8 @@ USE_REBAR3_GRISP_MATERIAL=false
 USE_GRISP_TOOLS_MATERIAL=false
 TOOLCHAIN_FROM_S3=false
 
-while test $# -gt 0; do
-    case "$1" in
+for i in "$@"; do
+    case "$i" in
         --toolchain-from-s3)
             shift
             TOOLCHAIN_FROM_S3=true
@@ -23,9 +23,9 @@ while test $# -gt 0; do
             shift
             USE_GRISP_MATERIAL=true
             ;;
-        --erlang-version)
+        --erlang-version=*)
+            ERLANG_VERSIONS="${i#*=}"
             shift
-            ERLANG_VERSIONS=$1
             ;;
         --use-rebar3-grisp-material)
             shift
