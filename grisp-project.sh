@@ -10,6 +10,7 @@ ERLANG_VERSIONS=$(cat .gocd/erlang_versions)
 
 USE_GRISP_MATERIAL=false
 USE_REBAR3_GRISP_MATERIAL=false
+USE_GRISP_TOOLS_MATERIAL=false
 
 while test $# -gt 0; do
     case "$1" in
