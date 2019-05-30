@@ -94,11 +94,11 @@ for v in $ERLANG_VERSIONS; do
                         file:write_file("rebar.config", lists:map(fun (E) -> io_lib:format("~p.~n", [E]) end, NewConfig)).' -s init stop
 
     # build grispapp
-    rebar3 grisp build --tar true
+    DEBUG=1 rebar3 grisp build --tar true
     cp _grisp/otp/*/package/grisp_otp_build_*.tar.gz "$BUILDDIR"
 
     # deploy release
-    rebar3 grisp deploy -v 0.1.0 -n ciproject
+    DEBUG=1 rebar3 grisp deploy -v 0.1.0 -n ciproject
     cd "$BUILDDIR"/grisp_release
     tar -czf "$BUILDDIR"/grisp_release_"$v".tar.gz .
 
