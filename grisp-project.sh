@@ -36,7 +36,7 @@ while test $# -gt 0; do
             USE_GRISP_TOOLS_MATERIAL=true
             ;;
         *)
-            break
+            shift
             ;;
     esac
 done
