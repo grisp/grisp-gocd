@@ -11,9 +11,14 @@ ERLANG_VERSIONS=$(cat .gocd/erlang_versions)
 USE_GRISP_MATERIAL=false
 USE_REBAR3_GRISP_MATERIAL=false
 USE_GRISP_TOOLS_MATERIAL=false
+TOOLCHAIN_FROM_S3=false
 
 while test $# -gt 0; do
     case "$1" in
+        --toolchain-from-s3)
+            shift
+            TOOLCHAIN_FROM_S3=true
+            ;;
         --use-grisp-material)
             shift
             USE_GRISP_MATERIAL=true
@@ -51,7 +56,7 @@ for v in $ERLANG_VERSIONS; do
     echo '{plugins, [rebar3_hex, grisp_tools, rebar3_grisp]}.' > ~/.config/rebar3/rebar.config
 
     mkdir -p "$BUILDDIR"/toolchain
-    if [[ $GO_PIPELINE_NAME == "grisp-new-toolchain" ]]; then
+    if [[ "$TOOLCHAIN_FROM_S3" = false ]]; then
         # use version from fetched artifact
         cd /
         tar -xzf "$BUILDDIR"/toolchain/grisp_toolchain*.tar.gz
