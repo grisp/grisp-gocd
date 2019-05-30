@@ -6,6 +6,7 @@ GO_PWD="$PWD"
 
 # workaround for https://github.com/ashwanthkumar/gocd-build-github-pull-requests/issues/133
 GRISP_SOFTWARE_REV=${GO_REVISION_GRISP_SOFTWARE:-$GO_SCM_GRISP_SOFTWARE_LABEL}
+echo "$GO_SCM_GRISP_SOFTWARE_PR_ID" > branch
 
 rm -rf /opt/grisp
 SHORT_SHA1=$(echo "$GRISP_SOFTWARE_REV" | cut -c 1-10)
