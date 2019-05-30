@@ -1,0 +1,96 @@
+{
+    "group": "grisp",
+    "name": "deploy-otp-to-s3",
+    "label_template": "${COUNT}",
+    "lock_behavior": "none",
+    "environment_variables": [
+        {
+            "name": "AWS_ACCESS_KEY_ID",
+            "encrypted_value": "AES:yW1yiUWzPbhRBaIwKEpYdw\u003d\u003d:uCQsX00aJwSEDaXFyvgy3Xs2BJqXcEs+ppRmPk8QKoE\u003d"
+        },
+        {
+            "name": "AWS_SECRET_ACCESS_KEY",
+            "encrypted_value": "AES:1iAe/SKkksSNwnmeGADVWQ\u003d\u003d:C1StS2ohTA5npH5phQEyKNlqyRd+FVqrf2fHrbzdmghp/r7nJ2F+ipLEbeUSA9Nh"
+        }
+    ],
+    "parameters": [],
+    "materials": [
+        {% for version in erlang_versions %}
+        {
+            "pipeline": "grisp-otp-{{ version }}",
+            "stage": "build",
+            "name": "grisp",
+            "type": "dependency"
+        },
+        {% endfor %}
+        {
+            "url": "https://github.com/nextl00p/grisp-gocd.git",
+            "branch": "master",
+            "shallow_clone": false,
+            "filter": {
+                "ignore": [],
+                "whitelist": []
+            },
+            "destination": ".gocd",
+            "auto_update": true,
+            "name": "grisp-gocd",
+            "type": "git"
+        }
+    ],
+    "stages": [
+        {
+            "name": "deploy",
+            "fetch_materials": true,
+            "never_cleanup_artifacts": false,
+            "clean_working_directory": true,
+            "approval": {
+                "type": "success",
+                "users": [],
+                "roles": []
+            },
+            "environment_variables": [],
+            "jobs": [
+                {
+                    "name": "deploy",
+                    "environment_variables": [],
+                    "tabs": [],
+                    "resources": [],
+                    "artifacts": [
+                        {
+                            "source": "deploy_log",
+                            "destination": "",
+                            "type": "build"
+                        }
+                    ],
+                    "properties": [],
+                    "run_instance_count": "0",
+                    "timeout": 0.0,
+                    "tasks": [
+                        {% for version in erlang_versions %}
+                        {
+                            "source": "otp",
+                            "is_source_a_file": false,
+                            "destination": "",
+                            "pipeline": "grisp-otp-{{ version }}",
+                            "stage": "build",
+                            "job": "build_grisp_project",
+                            "artifact_origin": "gocd",
+                            "run_if": "passed",
+                            "type": "fetch"
+                        },
+                        {% endfor %}
+                        {
+                            "command": "/bin/bash",
+                            "timeout": -1.0,
+                            "arguments": [
+                                ".gocd/deploy-otp.sh"
+                            ],
+                            "run_if": "passed",
+                            "type": "exec"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
