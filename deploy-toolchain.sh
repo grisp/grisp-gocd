@@ -14,5 +14,5 @@ fi
 if [[ $COUNT -eq 0 ]]; then
     aws s3 cp toolchain/"$ARCHIVENAME" s3://grisp/platforms/grisp_base/toolchain/ --acl public-read
 else
-    ®echo File already on S3
+    echo File already on S3
 fi > deploy_log 2>&1
