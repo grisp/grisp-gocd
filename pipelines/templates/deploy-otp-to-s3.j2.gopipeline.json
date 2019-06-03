@@ -24,7 +24,7 @@
         },
         {% endfor %}
         {
-            "url": "https://github.com/nextl00p/grisp-gocd.git",
+            "url": "https://github.com/grisp/grisp-gocd.git",
             "branch": "master",
             "shallow_clone": false,
             "filter": {
