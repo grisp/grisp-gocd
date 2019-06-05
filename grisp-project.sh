@@ -10,6 +10,7 @@ USE_GRISP_MATERIAL=false
 USE_REBAR3_GRISP_MATERIAL=false
 USE_GRISP_TOOLS_MATERIAL=false
 TOOLCHAIN_FROM_S3=false
+BUILD_OTP=true
 
 for i in "$@"; do
     case "$i" in
@@ -33,6 +34,10 @@ for i in "$@"; do
             shift
             USE_GRISP_TOOLS_MATERIAL=true
             ;;
+        --prebuilt-otp)
+            shift
+            BUILD_OTP=false
+            ;;
         *)
             shift
             ;;
@@ -52,6 +57,7 @@ asdf local rebar 3.10.0
 mkdir -p ~/.config/rebar3
 echo '{plugins, [rebar3_hex, grisp_tools, rebar3_grisp]}.' > ~/.config/rebar3/rebar.config
 
+if [[ "$BUILD_OTP" = true ]]; then
     mkdir -p "$BUILDDIR"/toolchain
     if [[ "$TOOLCHAIN_FROM_S3" = false ]]; then
         # use version from fetched artifact
@@ -63,6 +69,7 @@ echo '{plugins, [rebar3_hex, grisp_tools, rebar3_grisp]}.' > ~/.config/rebar3/re
         cd /
         curl -L https://s3.amazonaws.com/grisp/platforms/grisp_base/toolchain/grisp_toolchain_arm-rtems5_Linux_"${GRISP_TOOLCHAIN_REVISION}".tar.gz | tar -xz
     fi
+fi
 
 # install custom version of rebar3 plugin. symlink it in ~/.cache/rebar3/plugins
 if [[ "$USE_REBAR3_GRISP_MATERIAL" = true ]]; then
@@ -87,6 +94,7 @@ if [[ "$USE_GRISP_MATERIAL" = true ]]; then
     ln -s "$BUILDDIR"/grisp "$BUILDDIR"/ciproject/_checkouts/grisp
 fi
 
+if [[ "$BUILD_OTP" = true ]]; then
     # build otp
     TC_PATH=( /opt/grisp/grisp-software/grisp-base/*/rtems-install/rtems/5 )
     erl -noshell -eval '{ok, Config} = file:consult("rebar.config"),

@@ -3,47 +3,54 @@
 import os
 import jinja2
 import json
+import itertools
 
 config_repo_dir = "../grisp-gocd-config"
 
-all_otp_versions = [ "20.2", "21.0-rc1", "21.0"]
+all_otp_versions = [ "20.2", "21.0-rc1", "21.0" ]
+default_otp_version = [ "21.0" ]
+
 grisp_matrix={
     "grisp": {
         "versions": all_otp_versions,
         "grisp_material": True,
         "rebar3_grisp_material": False,
         "grisp_tools_material": False,
-        "fetch_toolchain": False
-    },
-    "rebar3-grisp-hex-tools-master": {
-        "versions": ["21.0"],
-        "grisp_material": False,
-        "rebar3_grisp_material": True,
-        "grisp_tools_material": True,
-        "fetch_toolchain": False
-    },
-    "rebar3-grisp-master-tools-master": {
-        "versions": ["21.0"],
-        "grisp_material": True,
-        "rebar3_grisp_material": True,
-        "grisp_tools_material": True,
-        "fetch_toolchain": False
-    },
-    "rebar3-grisp-master-tools-hex": {
-        "versions": ["21.0"],
-        "grisp_material": True,
-        "rebar3_grisp_material": True,
-        "grisp_tools_material": False,
-        "fetch_toolchain": False
+        "fetch_toolchain": False,
+        "build_otp" : True
     },
     "new-toolchain": {
         "versions": all_otp_versions,
         "grisp_material": False,
         "rebar3_grisp_material": False,
         "grisp_tools_material": False,
-        "fetch_toolchain": True
+        "fetch_toolchain": True,
+        "build_otp" : True
     }
 }
+
+
+def create_rebar3_conf(grisp, tools, build):
+    return { "rebar3_grisp_"+grisp[0]+"_tools_"+tools[0]+"_build_"+str(build[0]) : {
+        "versions": default_otp_version,
+        "grisp_material": grisp[1],
+        "rebar3_grisp_material": True,
+        "grisp_tools_material": tools[1],
+        "fetch_toolchain": False,
+        "build_otp": build[1]
+    }}
+
+# (PIPELINE_NAME, MATERIAL_VALUE)
+grisp_combinations = [ ("master", True), ("hex", False) ]
+tools_combinations = [ ("master", True), ("hex", False) ]
+build_combinations = [ ("true", True), ("false", False) ]
+
+rebar3_combinations = list(itertools.product(grisp_combinations, tools_combinations, build_combinations))
+
+for combination in rebar3_combinations:
+    conf = create_rebar3_conf(*combination)
+    for name, parameters in conf.items():
+        grisp_matrix[name] = parameters
 
 env = jinja2.Environment(loader = jinja2.FileSystemLoader(os.path.abspath('.')))
 
@@ -70,7 +77,8 @@ for pipeline_type, item in grisp_matrix.items():
                             "grisp_material" : item["grisp_material"],
                             "rebar3_grisp_material" : item["rebar3_grisp_material"],
                             "grisp_tools_material" : item["grisp_tools_material"],
-                            "fetch_toolchain" : item["fetch_toolchain"]
+                            "fetch_toolchain" : item["fetch_toolchain"],
+                            "build_otp" : item["build_otp"]
                         }
         )
 create_pipeline('deploy-otp-to-s3.j2.gopipeline.json',

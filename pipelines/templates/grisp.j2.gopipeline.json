@@ -91,11 +91,13 @@
                     "tabs": [],
                     "resources": [],
                     "artifacts": [
+                        {% if build_otp %}
                         {
                             "source": "grisp_otp*.tar.gz",
                             "destination": "otp",
                             "type": "build"
                         },
+                        {% endif %}
                         {
                             "source": "grisp_release*.tar.gz",
                             "destination": "grisp_release/",
