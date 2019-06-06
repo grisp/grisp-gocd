@@ -63,7 +63,7 @@ def create_pipeline(template, pipeline_name, data):
     json.loads(pipeline_json) # check if it's valid json
 
 def get_grisp_pipeline_name(pipeline_type, otp_version):
-    return "grisp-"+pipeline_type+"-otp-"+otp_version
+    return pipeline_type+"-otp-"+otp_version
 
 # grisp pipelines:
 for pipeline_type, item in grisp_matrix.items():
@@ -81,6 +81,7 @@ for pipeline_type, item in grisp_matrix.items():
                             "build_otp" : item["build_otp"]
                         }
         )
+
 create_pipeline('deploy-otp-to-s3.j2.gopipeline.json',
                 'deploy-otp-to-s3',
                 # all otp versions as upstream pipelines
