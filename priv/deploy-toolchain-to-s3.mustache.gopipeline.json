@@ -1,28 +1,35 @@
 {
     "group": "grisp",
-    "name": "deploy-otp-to-s3",
+    "name": "deploy-toolchain-to-s3",
     "label_template": "${COUNT}",
     "lock_behavior": "none",
     "environment_variables": [
         {
             "name": "AWS_ACCESS_KEY_ID",
-            "encrypted_value": "AES:yW1yiUWzPbhRBaIwKEpYdw\u003d\u003d:uCQsX00aJwSEDaXFyvgy3Xs2BJqXcEs+ppRmPk8QKoE\u003d"
+            "encrypted_value": "AES:NDatjHrPSJE+7sUeeiG2IA\u003d\u003d:rxnqUE4Ci3lsxIGQP1WrJGkJdgp9ES0IuSe6SpIVefc\u003d"
         },
         {
             "name": "AWS_SECRET_ACCESS_KEY",
-            "encrypted_value": "AES:1iAe/SKkksSNwnmeGADVWQ\u003d\u003d:C1StS2ohTA5npH5phQEyKNlqyRd+FVqrf2fHrbzdmghp/r7nJ2F+ipLEbeUSA9Nh"
+            "encrypted_value": "AES:tvRqF3tKo15dmHrf0NWYkA\u003d\u003d:jBn/N0dXbD7oB7vR9W+D/yIL5rtmndswyPWekmOwP6SI2q5GK/kRXKXjNXoFwm0l"
         }
     ],
     "parameters": [],
     "materials": [
-        {% for name in upstream_pipelines %}
         {
-            "pipeline": "{{ name }}",
+            "pipeline": "grisp-software",
             "stage": "build",
-            "name": "{{ name }}",
+            "name": "toolchain",
             "type": "dependency"
         },
-        {% endfor %}
+        {{#upstream_pipeline}}
+        {
+            "pipeline": "{{name}}",
+            "stage": "build",
+            "name": "{{name}}",
+            "type": "dependency"
+        },
+        {{/upstream_pipeline}}
+
         {
             "url": "https://github.com/grisp/grisp-gocd.git",
             "branch": "master",
@@ -51,7 +58,7 @@
             "environment_variables": [],
             "jobs": [
                 {
-                    "name": "deploy",
+                    "name": "fetch_toolchain",
                     "environment_variables": [],
                     "tabs": [],
                     "resources": [],
@@ -66,24 +73,22 @@
                     "run_instance_count": "0",
                     "timeout": 0.0,
                     "tasks": [
-                        {% for name in upstream_pipelines %}
                         {
-                            "source": "otp",
+                            "source": "toolchain",
                             "is_source_a_file": false,
                             "destination": "",
-                            "pipeline": "{{ name }}",
+                            "pipeline": "grisp-software",
                             "stage": "build",
-                            "job": "build_grisp_project",
+                            "job": "build.sh",
                             "artifact_origin": "gocd",
                             "run_if": "passed",
                             "type": "fetch"
                         },
-                        {% endfor %}
                         {
                             "command": "/bin/bash",
                             "timeout": -1.0,
                             "arguments": [
-                                ".gocd/deploy-otp.sh"
+                                ".gocd/deploy-toolchain.sh"
                             ],
                             "run_if": "passed",
                             "type": "exec"

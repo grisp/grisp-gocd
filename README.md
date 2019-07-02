@@ -1,31 +1,34 @@
-Build Scripts for Grisp GOCD Pipelines and Pipeline Templates
-=============================================================
+GRiSP-GOCD
+==========
 
-Pipelines
----------
+Repository for the GoCD CI system we use for GRiSP development.
 
-### Requirements
-
-- python3
-- python3-jinja2
-
-### Changing the Pipelines
-
-Have a look in `pipelines/create_pipelines.py` and the templates in `pipelines/templates/`.
-
-### Workflow
-
-This script assumes you have [grisp-gocd-config](https://github.com/grisp/grisp-gocd-config) checked out in `../grisp-gocd-config/`. When you execute `make` in this directory `pipelines/create_pipelines` will delete the contents of `../grisp-gocd-config/`, create new pipelines based on the `pipelnes/create_pipelines.py` and the templates in `pipelines/templates/`. Please verify the staged changes manually in the `grisp-gocd-config` repository, commit and push them. The [GoCD instance](https://public.ci.stritzinger.com) will shortly pick up the changes in the configrepo.
-
-To clean the `grisp-gocd-config` repo run `make clean`.
-
-Build Scripts
+Buildscripts
 -------------
 
-- `install-env.sh`: Installs rebar3, and Erlang
-- `grisp-project.sh`: Build OTP release with all possible Erlang versions:
-    - `--use-grisp-material`: Will link the grisp material into the `_checkouts` directory
-    - `--erlang-version 21.0`: Only test with OTP 21.0
-    - `--use-rebar3-grisp-material`: Will globally install the grisp plugin provided by a material
-- `deploy-toolchain.sh`: Deploys the toolchain to S3
-- `deploy-otp.sh`: Deploys OTP to S3
+Those scripts are added as a material to GoCD pipelines and they help building and testing the GRiSP components.
+
+Configrepo grisp-gocd-config/
+------------------------------
+
+The [configrepo](https://github.com/grisp/grisp-gocd-config) should be checked out inside `grisp-gocd-condig`. It is gitignored. The pipeline definitions stored in JSON files reside there.
+
+generate_pipelines
+--------------------
+
+The pipelines are created using an escript.
+
+###Build
+
+    $ rebar3 escriptize
+
+###Run
+
+    $ _build/default/bin/generate_pipelines
+
+Todo
+-----
+
+- Add Makefile to automaticly checkout and deal with the grisp-gocd-config repo
+- Automaticly generate the configrepo in a pipeline
+- Add Mix pipelines

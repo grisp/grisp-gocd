@@ -1,4 +1,27 @@
-{% macro scm(id, destination, name) -%}
+{
+    "group": "grisp",
+    "name": "{{name}}",
+    "label_template": "${COUNT}",
+    "lock_behavior": "none",
+    "environment_variables": [],
+    "parameters": [],
+    "materials": [
+{{#gitmaterial}}
+        {
+            "url": "{{ url }}",
+            "branch": "master",
+            "shallow_clone": false,
+            "filter": {
+                "ignore": [],
+                "whitelist": []
+            },
+            "destination": "{{ destination }}",
+            "auto_update": true,
+            "name": "{{ name }}",
+            "type": "git"
+        },
+{{/gitmaterial}}
+{{#scmmaterial}}
 {
     "scm_id": "{{ id }}",
     "destination": "{{ destination }}",
@@ -10,69 +33,16 @@
     "name": "{{ name }}",
     "type": "plugin"
 },
-{%- endmacro %}
-
-{% macro git(url, destination, name) -%}
-{
-    "url": "{{ url }}",
-    "branch": "master",
-    "shallow_clone": false,
-    "filter": {
-        "ignore": [],
-        "whitelist": []
-    },
-    "destination": "{{ destination }}",
-    "auto_update": true,
-    "name": "{{ name }}",
-    "type": "git"
-},
-{%- endmacro %}
-
-{
-    "group": "grisp",
-    "name": "{{ pipeline_name }}",
-    "label_template": "${COUNT}",
-    "lock_behavior": "none",
-    "environment_variables": [],
-    "parameters": [],
-    "materials": [
-        {% if grisp_material == 'git' %}
-            {{ git('https://github.com/grisp/grisp.git', 'grisp', 'grisp-git') }}
-        {% endif %}
-        {% if grisp_material == 'fb' %}
-            {{ scm('asdf123-e100-4e52-8ebf-a21193f47bf1', 'grisp', 'grisp-fb') }}
-        {% endif %}
-        {% if grisp_material == 'pr' %}
-            {{ scm('7797947b-a4eb-458f-b655-e3a3017c6a07', 'grisp', 'grisp-pr') }}
-        {% endif %}
-
-        {% if rebar3_grisp_material == 'git' %}
-            {{ git('https://github.com/grisp/rebar3_grisp.git', 'rebar3_grisp', 'rebar3_grisp-git') }}
-        {% endif %}
-        {% if rebar3_grisp_material == 'fb' %}
-            {{ scm('as1123-e100-4e52-8ebf-a21193f47bf1', 'rebar3_grisp', 'rebar3_grisp-fb') }}
-        {% endif %}
-        {% if rebar3_grisp_material == 'pr' %}
-             {{ scm('a0a55708-e100-4e52-8ebf-a21193f47bf1', 'rebar3_grisp', 'rebar3_grisp-pr') }}
-        {% endif %}
-
-        {% if grisp_tools_material == 'git' %}
-            {{ git('https://github.com/grisp/grisp_tools.git', 'grisp_tools', 'grisp_tools-git') }}
-        {% endif %}
-        {% if grisp_tools_material == 'fb' %}
-            {{ scm('sfdf123-e100-4e52-8ebf-a21193f47bf1', 'grisp_tools', 'grisp_tools-fb') }}
-        {% endif %}
-        {% if grisp_tools_material == 'pr' %}
-            {{ scm('b0a55708-e100-4e52-8ebf-a21193f47bf1', 'grisp_tools', 'grisp_tools-pr') }}
-        {% endif %}
-        {% if fetch_toolchain %}
+{{/scmmaterial}}
+{{#fetch_toolchain}}
         {
             "pipeline": "grisp-software",
             "stage": "build",
             "name": "grisp-software",
             "type": "dependency"
         },
-        {% endif %}
+
+{{/fetch_toolchain}}
         {
             "url": "https://github.com/grisp/grisp-gocd.git",
             "branch": "master",
@@ -111,13 +81,13 @@
                     "tabs": [],
                     "resources": [],
                     "artifacts": [
-                        {% if build_otp %}
+                        {{#build_otp}}
                         {
                             "source": "grisp_otp*.tar.gz",
                             "destination": "otp",
                             "type": "build"
                         },
-                        {% endif %}
+                        {{/build_otp}}
                         {
                             "source": "grisp_release*.tar.gz",
                             "destination": "grisp_release/",
@@ -128,7 +98,7 @@
                     "run_instance_count": "0",
                     "timeout": 0.0,
                     "tasks": [
-                        {% if fetch_toolchain %}
+                        {{#fetch_toolchain}}
                         {
                             "source": "toolchain",
                             "is_source_a_file": false,
@@ -140,7 +110,7 @@
                             "run_if": "passed",
                             "type": "fetch"
                         },
-                        {% endif %}
+                        {{/fetch_toolchain}}
                         {
                             "command": "/bin/bash",
                             "timeout": -1.0,
@@ -150,12 +120,25 @@
                             "run_if": "passed",
                             "type": "exec"
                         },
+{{#checkout}}
+                        {
+                            "command": "/usr/bin/git",
+                            "timeout": -1.0,
+                            "arguments": [
+                                "clone",
+                                "{{url}}",
+                                "{{destination}}"
+                            ],
+                            "run_if": "passed",
+                            "type": "exec"
+                        },
+{{/checkout}}
                         {
                             "command": "/bin/bash",
                             "timeout": -1.0,
                             "arguments": [
                                 ".gocd/grisp-project.sh",
-                                "--erlang-version={{ version }}"{% if grisp_material %}, "--use-grisp-material"{% endif %}{% if rebar3_grisp_material %}, "--use-rebar3-grisp-material"{% endif %}{% if grisp_tools_material %}, "--use-grisp-tools-material"{% endif %}{% if not fetch_toolchain %}, "--toolchain-from-s3"{% endif %}{% if not build_otp %}, "--prebuilt-otp"{% endif %}
+                                "--erlang-version={{version}}" {{#scmmaterial}}, "--use-{{name}}-material" {{/scmmaterial}}{{#gitmaterial}}, "--use-{{name}}-material"{{/gitmaterial}}{{#checkout}}, "--use-{{name}}-material"{{/checkout}}{{^build_otp}}, "--prebuilt-otp"{{/build_otp}}{{^fetch_toolchain}},"--toolchain-from-s3" {{/fetch_toolchain}}
                             ],
                             "run_if": "passed",
                             "type": "exec"

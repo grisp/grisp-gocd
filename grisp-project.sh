@@ -26,11 +26,11 @@ for i in "$@"; do
             ERLANG_VERSION="${i#*=}"
             shift
             ;;
-        --use-rebar3-grisp-material)
+        --use-rebar3_grisp-material)
             shift
             USE_REBAR3_GRISP_MATERIAL=true
             ;;
-        --use-grisp-tools-material)
+        --use-grisp_tools-material)
             shift
             USE_GRISP_TOOLS_MATERIAL=true
             ;;

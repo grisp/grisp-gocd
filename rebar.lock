@@ -1,0 +1,8 @@
+{"1.1.0",
+[{<<"bbmustache">>,{pkg,<<"bbmustache">>,<<"1.6.1">>},0},
+ {<<"jsone">>,{pkg,<<"jsone">>,<<"1.5.0">>},0}]}.
+[
+{pkg_hash,[
+ {<<"bbmustache">>, <<"9FB63FA60BD53AFBF47F02E6D8BD6B2BEAFC068E02E20975254DC7461FD4F397">>},
+ {<<"jsone">>, <<"410F5208BCAE541BF941B3F2756E5BB5A4C8694D7FFD6B34B909AE88262629C0">>}]}
+].
