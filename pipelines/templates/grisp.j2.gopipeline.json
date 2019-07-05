@@ -1,3 +1,33 @@
+{% macro scm(id, destination, name) -%}
+{
+    "scm_id": "{{ id }}",
+    "destination": "{{ destination }}",
+    "filter": {
+        "ignore": [],
+        "whitelist": []
+    },
+    "configuration": [],
+    "name": "{{ name }}",
+    "type": "plugin"
+},
+{%- endmacro %}
+
+{% macro git(url, destination, name) -%}
+{
+    "url": "{{ url }}",
+    "branch": "master",
+    "shallow_clone": false,
+    "filter": {
+        "ignore": [],
+        "whitelist": []
+    },
+    "destination": "{{ destination }}",
+    "auto_update": true,
+    "name": "{{ name }}",
+    "type": "git"
+},
+{%- endmacro %}
+
 {
     "group": "grisp",
     "name": "{{ pipeline_name }}",
@@ -6,44 +36,34 @@
     "environment_variables": [],
     "parameters": [],
     "materials": [
-        {% if grisp_material %}
-        {
-            "scm_id": "7797947b-a4eb-458f-b655-e3a3017c6a07",
-            "destination": "grisp",
-            "filter": {
-                "ignore": [],
-                "whitelist": []
-            },
-            "configuration": [],
-            "name": "grisp",
-            "type": "plugin"
-        },
+        {% if grisp_material == 'git' %}
+            {{ git('https://github.com/grisp/grisp.git', 'grisp', 'grisp-git') }}
         {% endif %}
-        {% if rebar3_grisp_material %}
-        {
-            "scm_id": "a0a55708-e100-4e52-8ebf-a21193f47bf1",
-            "destination": "rebar3_grisp",
-            "filter": {
-                "ignore": [],
-                "whitelist": []
-            },
-            "configuration": [],
-            "name": "rebar3_grisp",
-            "type": "plugin"
-        },
+        {% if grisp_material == 'fb' %}
+            {{ scm('asdf123-e100-4e52-8ebf-a21193f47bf1', 'grisp', 'grisp-fb') }}
         {% endif %}
-        {% if grisp_tools_material %}
-        {
-            "scm_id": "b0a55708-e100-4e52-8ebf-a21193f47bf1",
-            "destination": "grisp_tools",
-            "filter": {
-                "ignore": [],
-                "whitelist": []
-            },
-            "configuration": [],
-            "name": "grisp_tools",
-            "type": "plugin"
-        },
+        {% if grisp_material == 'pr' %}
+            {{ scm('7797947b-a4eb-458f-b655-e3a3017c6a07', 'grisp', 'grisp-pr') }}
+        {% endif %}
+
+        {% if rebar3_grisp_material == 'git' %}
+            {{ git('https://github.com/grisp/rebar3_grisp.git', 'rebar3_grisp', 'rebar3_grisp-git') }}
+        {% endif %}
+        {% if rebar3_grisp_material == 'fb' %}
+            {{ scm('as1123-e100-4e52-8ebf-a21193f47bf1', 'rebar3_grisp', 'rebar3_grisp-fb') }}
+        {% endif %}
+        {% if rebar3_grisp_material == 'pr' %}
+             {{ scm('a0a55708-e100-4e52-8ebf-a21193f47bf1', 'rebar3_grisp', 'rebar3_grisp-pr') }}
+        {% endif %}
+
+        {% if grisp_tools_material == 'git' %}
+            {{ git('https://github.com/grisp/grisp_tools.git', 'grisp_tools', 'grisp_tools-git') }}
+        {% endif %}
+        {% if grisp_tools_material == 'fb' %}
+            {{ scm('sfdf123-e100-4e52-8ebf-a21193f47bf1', 'grisp_tools', 'grisp_tools-fb') }}
+        {% endif %}
+        {% if grisp_tools_material == 'pr' %}
+            {{ scm('b0a55708-e100-4e52-8ebf-a21193f47bf1', 'grisp_tools', 'grisp_tools-pr') }}
         {% endif %}
         {% if fetch_toolchain %}
         {
@@ -135,7 +155,7 @@
                             "timeout": -1.0,
                             "arguments": [
                                 ".gocd/grisp-project.sh",
-                                "--erlang-version={{ erlang_version }}"{% if grisp_material %}, "--use-grisp-material"{% endif %}{% if rebar3_grisp_material %}, "--use-rebar3-grisp-material"{% endif %}{% if grisp_tools_material %}, "--use-grisp-tools-material"{% endif %}{% if not fetch_toolchain %}, "--toolchain-from-s3"{% endif %}{% if not build_otp %}, "--prebuilt-otp"{% endif %}
+                                "--erlang-version={{ version }}"{% if grisp_material %}, "--use-grisp-material"{% endif %}{% if rebar3_grisp_material %}, "--use-rebar3-grisp-material"{% endif %}{% if grisp_tools_material %}, "--use-grisp-tools-material"{% endif %}{% if not fetch_toolchain %}, "--toolchain-from-s3"{% endif %}{% if not build_otp %}, "--prebuilt-otp"{% endif %}
                             ],
                             "run_if": "passed",
                             "type": "exec"
