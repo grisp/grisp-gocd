@@ -32,3 +32,4 @@ Todo
 - Add Makefile to automaticly checkout and deal with the grisp-gocd-config repo
 - Automaticly generate the configrepo in a pipeline
 - Add Mix pipelines
+- Add grisp-software
