@@ -3,9 +3,9 @@
 
 get_template_data() ->
     Config = get_full_config(config()),
-    Permutations = get_permutations(Config),
-    ResolvedName = resolve_name(Permutations),
-    TemplateData = preprocess_template_data(ResolvedName),
+    Permutations = generate_pipelines:get_permutations(Config),
+    ResolvedName = generate_pipelines:resolve_funs(Permutations),
+    TemplateData = generate_pipelines:acc_template_data(ResolvedName, fun transform_dep/1),
     TemplateData.
 
 all_otp_versions() ->
@@ -101,136 +101,79 @@ get_full_config([{Type, Conf}|T]) ->
     [{Type, Replaced} | get_full_config(T)];
 get_full_config(Conf) -> Conf.
 
-
-get_permutations(Config) ->
-    get_permutations(Config, []).
-get_permutations([], Acc) ->
-    Acc;
-get_permutations([H|T], Acc) ->
-    {_Type, Config} = H,
-    Perms = get_permutations_type(Config),
-    get_permutations(T, Perms ++ Acc).
-
-get_permutations_type([]) -> [[]];
-get_permutations_type([{Key, Vals}|T]) when is_list(Vals) ->
-    [ [{Key, Val}|B] || Val <- Vals, B <- get_permutations_type(T) ];
-get_permutations_type([{Key, Tuple}|T]) when is_tuple(Tuple) ->
-    {DepType, Vals} = Tuple,
-    [ [{Key, {DepType, Val}}|B] || Val <- Vals, B <- get_permutations_type(T) ];
-get_permutations_type([{Key, Val}|T]) ->
-    [ [{Key, Val}|B] || B <- get_permutations_type(T) ].
-
-resolve_name(In) ->
-    resolve_name(In, []).
-resolve_name([], Resolved) ->
-    Resolved;
-resolve_name([H|T], Resolved) ->
-    {value, {name, NameFun}} = lists:keysearch(name, 1, H),
-    Pipeline = lists:keyreplace(name, 1, H, {name, NameFun(H)}),
-    resolve_name(T, [Pipeline|Resolved]).
-
-preprocess_template_data(Data) ->
-    preprocess_template_data(Data, []).
-preprocess_template_data([], Buf) ->
-    Buf;
-preprocess_template_data([H|T], Buf) ->
-    Processed = lists:map(fun
-                              ({grisp, {trigger, master}}) ->
-                                  {gitmaterial, [
-                                                 {url, "https://github.com/grisp/grisp.git"},
-                                                 {destination, "grisp/"},
-                                                 {name, "grisp"}
-                                                ]};
-                              ({grisp, {trigger, pr}}) ->
-                                  {scmmaterial, [
-                                                 {id, "7797947b-a4eb-458f-b655-e3a3017c6a07"},
-                                                 {destination, "grisp/"},
-                                                 {name, "grisp"}
-                                               ]};
-                              ({grisp, {trigger, fb}}) ->
-                                  {scmmaterial, [
-                                                 {id, "asdf123-e100-4e52-8ebf-a21193f47bf1"},
-                                                 {destination, "grisp/"},
-                                                 {name, "grisp"}
-                                                ]};
-                              ({grisp, master}) ->
-                                  {checkout, [
-                                              {url, "https://github.com/grisp/grisp.git"},
-                                              {name, "grisp"},
-                                              {destination, "grisp/"}
-                                             ]};
-                              ({rebar3_grisp, {trigger, master}}) ->
-                                  {gitmaterial, [
-                                                 {url, "https://github.com/grisp/rebar3_grisp.git"},
-                                                 {destination, "rebar3_grisp/"},
-                                                 {name, "rebar3_grisp"}
-                                                ]};
-                              ({rebar3_grisp, {trigger, pr}}) ->
-                                  {scmmaterial, [
-                                                 {id, "a0a55708-e100-4e52-8ebf-a21193f47bf1"},
-                                                 {destination, "rebar3_grisp/"},
-                                                 {name, "rebar3_grisp"}
-                                                ]};
-                              ({rebar3_grisp, {trigger, fb}}) ->
-                                  {scmmaterial, [
-                                                 {id, "as1123-e100-4e52-8ebf-a21193f47bf1"},
-                                                 {destination, "rebar3_grisp/"},
-                                                 {name, "rebar3_grisp"}
-                                                ]};
-                              ({rebar3_grisp, master}) ->
-                                  {checkout, [
-                                              {url,"https://github.com/grisp/rebar3_grisp.git"},
-                                              {destination, "rebar3_grisp/"},
-                                              {name, "rebar3_grisp"}
-                                             ]};
-                              ({grisp_tools, {trigger, master}}) ->
-                                  {gitmaterial, [
-                                                 {url, "https://github.com/grisp/grisp_tools.git"},
-                                                 {destination, "grisp_tools/"},
-                                                 {name, "grisp_tools"}
-                                                ]};
-                              ({grisp_tools, {trigger, pr}}) ->
-                                 {scmmaterial, [
-                                                {id, "b0a55708-e100-4e52-8ebf-a21193f47bf1"},
-                                                {destination, "grisp_tools/"},
-                                                {name, "grisp_tools"}
-                                               ]};
-                              ({grisp_tools, {trigger, fb}}) ->
-                                  {scmmaterial, [
-                                                 {id, "sfdf123-e100-4e52-8ebf-a21193f47bf1"},
-                                                 {destination, "grisp_tools/"},
-                                                 {name, "grisp_tools"}
-                                                ]};
-                              ({grisp_tools, master}) ->
-                                  {checkout, [
-                                              {url, "https://github.com/grisp/grisp_tools.git"},
-                                              {destination, "grisp_tools/"},
-                                              {name, "grisp_tools"}
-                                             ]};
-                              ({Key, true}) -> {Key, true};
-                              ({Key, false}) -> {Key, false};
-                              ({Key, Val}) when is_atom(Val) -> {Key, list_to_binary(atom_to_list(Val))};
-                              (Else) -> Else
-                          end, H),
-    Gitmaterials = lists:foldl(fun
-                                   ({gitmaterial, Val}, Acc) -> [Val|Acc];
-                                   (_Other, Acc) -> Acc
-                               end, [], Processed),
-    Scmmaterials = lists:foldl(fun
-                                   ({scmmaterial, Val}, Acc) -> [Val|Acc];
-                                   (_Other, Acc) -> Acc
-                               end, [], Processed),
-    Checkouts = lists:foldl(fun
-                                ({checkout, Val}, Acc) -> [Val|Acc];
-                                (_Other, Acc) -> Acc
-                            end, [], Processed),
-    Removed = lists:filter(fun
-                               ({gitmaterial, _Val}) -> false;
-                               ({scmmaterial, _Val}) -> false;
-                               ({checkout, _Val}) -> false;
-                               (_Else) -> true
-                          end, Processed),
-    NewData = Removed ++ [{gitmaterial, Gitmaterials}] ++
-        [{scmmaterial, Scmmaterials}] ++
-        [{checkout, Checkouts}],
-    preprocess_template_data(T, [NewData|Buf]).
+transform_dep({grisp, {trigger, master}}) ->
+    {gitmaterial, [
+                   {url, "https://github.com/grisp/grisp.git"},
+                   {destination, "grisp/"},
+                   {name, "grisp"}
+                  ]};
+transform_dep({grisp, {trigger, pr}}) ->
+    {scmmaterial, [
+                   {id, "7797947b-a4eb-458f-b655-e3a3017c6a07"},
+                   {destination, "grisp/"},
+                   {name, "grisp"}
+                  ]};
+transform_dep({grisp, {trigger, fb}}) ->
+    {scmmaterial, [
+                   {id, "asdf123-e100-4e52-8ebf-a21193f47bf1"},
+                   {destination, "grisp/"},
+                   {name, "grisp"}
+                  ]};
+transform_dep({grisp, master}) ->
+    {checkout, [
+                {url, "https://github.com/grisp/grisp.git"},
+                {name, "grisp"},
+                {destination, "grisp/"}
+               ]};
+transform_dep({rebar3_grisp, {trigger, master}}) ->
+    {gitmaterial, [
+                   {url, "https://github.com/grisp/rebar3_grisp.git"},
+                   {destination, "rebar3_grisp/"},
+                   {name, "rebar3_grisp"}
+                  ]};
+transform_dep({rebar3_grisp, {trigger, pr}}) ->
+    {scmmaterial, [
+                   {id, "a0a55708-e100-4e52-8ebf-a21193f47bf1"},
+                   {destination, "rebar3_grisp/"},
+                   {name, "rebar3_grisp"}
+                  ]};
+transform_dep({rebar3_grisp, {trigger, fb}}) ->
+    {scmmaterial, [
+                   {id, "as1123-e100-4e52-8ebf-a21193f47bf1"},
+                   {destination, "rebar3_grisp/"},
+                   {name, "rebar3_grisp"}
+                  ]};
+transform_dep({rebar3_grisp, master}) ->
+    {checkout, [
+                {url,"https://github.com/grisp/rebar3_grisp.git"},
+                {destination, "rebar3_grisp/"},
+                {name, "rebar3_grisp"}
+               ]};
+transform_dep({grisp_tools, {trigger, master}}) ->
+    {gitmaterial, [
+                   {url, "https://github.com/grisp/grisp_tools.git"},
+                   {destination, "grisp_tools/"},
+                   {name, "grisp_tools"}
+                  ]};
+transform_dep({grisp_tools, {trigger, pr}}) ->
+    {scmmaterial, [
+                   {id, "b0a55708-e100-4e52-8ebf-a21193f47bf1"},
+                   {destination, "grisp_tools/"},
+                   {name, "grisp_tools"}
+                  ]};
+transform_dep({grisp_tools, {trigger, fb}}) ->
+    {scmmaterial, [
+                   {id, "sfdf123-e100-4e52-8ebf-a21193f47bf1"},
+                   {destination, "grisp_tools/"},
+                   {name, "grisp_tools"}
+                  ]};
+transform_dep({grisp_tools, master}) ->
+    {checkout, [
+                {url, "https://github.com/grisp/grisp_tools.git"},
+                {destination, "grisp_tools/"},
+                {name, "grisp_tools"}
+               ]};
+transform_dep({Key, true}) -> {Key, true};
+transform_dep({Key, false}) -> {Key, false};
+transform_dep({Key, Val}) when is_atom(Val) -> {Key, list_to_binary(atom_to_list(Val))};
+transform_dep(Else) -> Else.

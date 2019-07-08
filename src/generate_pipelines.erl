@@ -2,6 +2,11 @@
 
 %% API exports
 -export([main/1]).
+-export([
+         get_permutations/1,
+         resolve_funs/1,
+         acc_template_data/2
+        ]).
 
 %%====================================================================
 %% API functions
@@ -47,3 +52,62 @@ render_template(TemplateFile, Data) ->
                                    ]),
     %io:format("~s~n", [Pretty]),
     Pretty.
+get_permutations(Config) ->
+    get_permutations(Config, []).
+get_permutations([], Acc) ->
+    Acc;
+get_permutations([H|T], Acc) ->
+    {_Type, Config} = H,
+    Perms = get_permutations_type(Config),
+    get_permutations(T, Perms ++ Acc).
+
+get_permutations_type([]) -> [[]];
+get_permutations_type([{Key, Vals}|T]) when is_list(Vals) ->
+    [ [{Key, Val}|B] || Val <- Vals, B <- get_permutations_type(T) ];
+get_permutations_type([{Key, Tuple}|T]) when is_tuple(Tuple) ->
+    {DepType, Vals} = Tuple,
+    [ [{Key, {DepType, Val}}|B] || Val <- Vals, B <- get_permutations_type(T) ];
+get_permutations_type([{Key, Val}|T]) ->
+    [ [{Key, Val}|B] || B <- get_permutations_type(T) ].
+
+resolve_funs(In) ->
+    resolve_funs(In, []).
+resolve_funs([], Resolved) ->
+    Resolved;
+resolve_funs([H|T], Resolved) ->
+    Pipeline = lists:map(fun
+                  ({Key, Val}) when is_function(Val) ->
+                      {Key, Val(H)};
+                  (Else) -> Else
+              end, H),
+    resolve_funs(T, [Pipeline|Resolved]).
+
+acc_template_data(Data, Fun) ->
+    acc_template_data(Data, [], Fun).
+acc_template_data([], Buf, _Fun) ->
+    Buf;
+acc_template_data([H|T], Buf, Fun) ->
+    io:format("~p", [Fun]),
+    Processed = lists:map(Fun, H),
+    Gitmaterials = lists:foldl(fun
+                                   ({gitmaterial, Val}, Acc) -> [Val|Acc];
+                                   (_Other, Acc) -> Acc
+                               end, [], Processed),
+    Scmmaterials = lists:foldl(fun
+                                   ({scmmaterial, Val}, Acc) -> [Val|Acc];
+                                   (_Other, Acc) -> Acc
+                               end, [], Processed),
+    Checkouts = lists:foldl(fun
+                                ({checkout, Val}, Acc) -> [Val|Acc];
+                                (_Other, Acc) -> Acc
+                            end, [], Processed),
+    Removed = lists:filter(fun
+                               ({gitmaterial, _Val}) -> false;
+                               ({scmmaterial, _Val}) -> false;
+                               ({checkout, _Val}) -> false;
+                               (_Else) -> true
+                          end, Processed),
+    NewData = Removed ++ [{gitmaterial, Gitmaterials}] ++
+        [{scmmaterial, Scmmaterials}] ++
+        [{checkout, Checkouts}],
+    acc_template_data(T, [NewData|Buf]).
