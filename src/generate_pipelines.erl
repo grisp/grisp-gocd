@@ -87,7 +87,6 @@ acc_template_data(Data, Fun) ->
 acc_template_data([], Buf, _Fun) ->
     Buf;
 acc_template_data([H|T], Buf, Fun) ->
-    io:format("~p", [Fun]),
     Processed = lists:map(Fun, H),
     Gitmaterials = lists:foldl(fun
                                    ({gitmaterial, Val}, Acc) -> [Val|Acc];
@@ -110,4 +109,4 @@ acc_template_data([H|T], Buf, Fun) ->
     NewData = Removed ++ [{gitmaterial, Gitmaterials}] ++
         [{scmmaterial, Scmmaterials}] ++
         [{checkout, Checkouts}],
-    acc_template_data(T, [NewData|Buf]).
+    acc_template_data(T, [NewData|Buf], Fun).
