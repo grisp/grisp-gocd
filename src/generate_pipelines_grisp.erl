@@ -1,11 +1,11 @@
 -module(generate_pipelines_grisp).
 -export([get_template_data/0]).
-
+-export([transform_dep/1]).
 get_template_data() ->
     Config = get_full_config(config()),
     Permutations = generate_pipelines:get_permutations(Config),
     ResolvedName = generate_pipelines:resolve_funs(Permutations),
-    TemplateData = generate_pipelines:acc_template_data(ResolvedName, fun transform_dep/1),
+    TemplateData = generate_pipelines:acc_template_data(ResolvedName, fun generate_pipelines_grisp:transform_dep/1),
     TemplateData.
 
 all_otp_versions() ->
