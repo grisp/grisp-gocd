@@ -3,7 +3,8 @@
 -export([get_template_data/1]).
 
 get_template_data(GrispData) ->
-    [{upstream_pipeline,
+    [
+     {upstream_pipeline,
      lists:foldl(fun
                      (E, UpstreamPipelines) ->
                          case {lists:keysearch(push_otp, 1, E), lists:keysearch(gitmaterial, 1, E)} of
@@ -15,5 +16,6 @@ get_template_data(GrispData) ->
                                  [[{name, Name}]|UpstreamPipelines];
                              {{value, {push_otp, true}}, _} -> UpstreamPipelines
                         end
-                 end, [], GrispData)
-    }].
+                 end, [], GrispData)},
+     {group, deploy}
+].

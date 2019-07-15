@@ -4,8 +4,11 @@
 -export([main/1]).
 -export([
          get_permutations/1,
+         build_dep_graph/1,
          resolve_funs/1,
-         acc_template_data/2
+         acc_template_data/4,
+         vertex_map/2,
+         graph_to_list/1
         ]).
 
 %%====================================================================
@@ -33,15 +36,25 @@ main(_Args) ->
                       file:write_file("grisp-gocd-config/" ++ Name ++ ".gopipeline.json", Val) end, Templates),
     erlang:halt(0).
 
-%%====================================================================
-%% Internal functions
-%%====================================================================
+vertex_map(Fun, Graph) ->
+    VerticesList = digraph:vertices(Graph),
+    lists:map(fun (Vertex) ->
+                      {Vertex, Label} = digraph:vertex(Graph, Vertex),
+                      digraph:add_vertex(Graph, Vertex, Fun(Label, Graph, Vertex))
+              end, VerticesList),
+    Graph.
+
+graph_to_list(Graph) ->
+    lists:map(fun (Vertex) ->
+                      {Vertex, Label} = digraph:vertex(Graph, Vertex),
+                      Label
+              end,
+              digraph:vertices(Graph)).
 
 render_template(TemplateFile, Data) ->
     Template = bbmustache:parse_file(TemplateFile),
     Rendered = bbmustache:compile(Template, Data, [{key_type, atom}]),
     %% did we produce valid JSON?
-    %io:format("~s~n", [Rendered]),
     Decoded = jsone:decode(Rendered),
     Pretty = jsone:encode(Decoded, [
                                     {indent, 2},
@@ -50,7 +63,6 @@ render_template(TemplateFile, Data) ->
                                     native_forward_slash,
                                     {float_format, [{decimals, 2}, compact]}
                                    ]),
-    %io:format("~s~n", [Pretty]),
     Pretty.
 get_permutations(Config) ->
     get_permutations(Config, []).
@@ -62,32 +74,52 @@ get_permutations([H|T], Acc) ->
     get_permutations(T, Perms ++ Acc).
 
 get_permutations_type([]) -> [[]];
+get_permutations_type([{downstream, Vals}|T]) ->
+    [[{downstream, Vals}|B] || B <- get_permutations_type(T)];
 get_permutations_type([{Key, Vals}|T]) when is_list(Vals) ->
     [ [{Key, Val}|B] || Val <- Vals, B <- get_permutations_type(T) ];
 get_permutations_type([{Key, Tuple}|T]) when is_tuple(Tuple) ->
     {DepType, Vals} = Tuple,
-    [ [{Key, {DepType, Val}}|B] || Val <- Vals, B <- get_permutations_type(T) ];
+    [ [{Key, {DepType, Val}}|B] || Val <- Vals, B <- get_permutations_type(T)];
 get_permutations_type([{Key, Val}|T]) ->
     [ [{Key, Val}|B] || B <- get_permutations_type(T) ].
 
-resolve_funs(In) ->
-    resolve_funs(In, []).
-resolve_funs([], Resolved) ->
-    Resolved;
-resolve_funs([H|T], Resolved) ->
-    Pipeline = lists:map(fun
-                  ({Key, Val}) when is_function(Val) ->
-                      {Key, Val(H)};
-                  (Else) -> Else
-              end, H),
-    resolve_funs(T, [Pipeline|Resolved]).
+build_dep_graph(Config) ->
+    %% put everything into a digraph as a vertice
+    G = digraph:new([acyclic]),
+    lists:map(fun (Conf) ->
+                      V = digraph:add_vertex(G),
+                      case lists:keyfind(downstream, 1, Conf) of
+                          {downstream, DSList} ->
+                              UpstreamV = digraph:add_vertex(G, V, Conf),
+                              %% Add vertex and edge for downstream pipeline
+                              lists:map(fun ({Key, Val}) ->
+                                                %% same config just with replaced {key, val}
+                                                io:format("strewe"),
+                                                ConfDS = lists:keyreplace(Key, 1, Conf, {Key, Val}),
+                                                DownstreamV = digraph:add_vertex(G),
+                                                DownstreamV = digraph:add_vertex(G, DownstreamV, ConfDS),
+                                                digraph:add_edge(G, UpstreamV, DownstreamV),
+                                                ok
+                                        end, DSList),
+                              ok;
+                          false ->
+                              digraph:add_vertex(G, V, Conf),
+                              ok
+                      end
+              end, Config),
+    G.
 
-acc_template_data(Data, Fun) ->
-    acc_template_data(Data, [], Fun).
-acc_template_data([], Buf, _Fun) ->
-    Buf;
-acc_template_data([H|T], Buf, Fun) ->
-    Processed = lists:map(Fun, H),
+resolve_funs(Config) ->
+    lists:map(fun
+                  ({Key, Val}) when is_function(Val) ->
+                      io:format("Name ~p~n", [Val(Config)]),
+                      {Key, Val(Config)};
+                  (Else) -> Else
+              end, Config).
+
+acc_template_data(Config, Graph, Vertex, Fun) ->
+    Processed = lists:map(Fun, Config),
     Gitmaterials = lists:foldl(fun
                                    ({gitmaterial, Val}, Acc) -> [Val|Acc];
                                    (_Other, Acc) -> Acc
@@ -105,8 +137,13 @@ acc_template_data([H|T], Buf, Fun) ->
                                ({scmmaterial, _Val}) -> false;
                                ({checkout, _Val}) -> false;
                                (_Else) -> true
-                          end, Processed),
-    NewData = Removed ++ [{gitmaterial, Gitmaterials}] ++
+                           end, Processed),
+    UpstreamPipelines = lists:map(fun (Edge) ->
+                                          io:format("yolo"),
+                                          {Edge, FromV, _ToV, _Label} = digraph:edge(Graph, Edge),
+                                          {FromV, UpstreamData} = digraph:vertex(Graph, FromV),
+                                          [lists:keyfind(name, 1, UpstreamData)]
+                                  end, digraph:in_edges(Graph, Vertex)),
+    Removed ++ [{gitmaterial, Gitmaterials}] ++
         [{scmmaterial, Scmmaterials}] ++
-        [{checkout, Checkouts}],
-    acc_template_data(T, [NewData|Buf], Fun).
+        [{checkout, Checkouts}] ++ [{upstream_pipeline, UpstreamPipelines}].

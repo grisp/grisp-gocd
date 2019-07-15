@@ -1,5 +1,5 @@
 {
-    "group": "grisp",
+    "group": "{{group}}",
     "name": "deploy-otp-to-s3",
     "label_template": "${COUNT}",
     "lock_behavior": "none",

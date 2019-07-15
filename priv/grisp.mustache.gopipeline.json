@@ -1,5 +1,5 @@
 {
-    "group": "grisp",
+    "group": "{{group}}",
     "name": "{{name}}",
     "label_template": "${COUNT}",
     "lock_behavior": "none",
@@ -43,6 +43,14 @@
         },
 
 {{/fetch_toolchain}}
+        {{#upstream_pipeline}}
+        {
+            "pipeline": "{{name}}",
+            "stage": "build",
+            "name": "{{name}}",
+            "type": "dependency"
+        },
+        {{/upstream_pipeline}}
         {
             "url": "https://github.com/grisp/grisp-gocd.git",
             "branch": "master",

@@ -3,7 +3,8 @@
 -export([get_template_data/1]).
 
 get_template_data(GrispData) ->
-    [{upstream_pipeline,
+    [
+     {upstream_pipeline,
      lists:foldl(fun
                      (E, UpstreamPipelines) ->
                          case lists:keysearch(push_toolchain, 1, E) of
@@ -13,5 +14,6 @@ get_template_data(GrispData) ->
                                  {value, {name, Name}} = lists:keysearch(name, 1, E),
                                  [[{name, Name}]|UpstreamPipelines]
                         end
-                 end, [], GrispData)
-    }].
+                 end, [], GrispData)},
+     {group, deploy}
+    ].
