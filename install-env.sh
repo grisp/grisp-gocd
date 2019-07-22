@@ -3,16 +3,16 @@
 set -euxo pipefail
 
 # asdf installed
-if cd ~/.asdf; then
-    git pull origin master
-else
+if ! cd ~/.asdf; then
     git clone https://github.com/asdf-vm/asdf.git ~/.asdf
 fi
-git -C ~/.asdf checkout "$(git describe --abbrev=0 --tags)"
 
 set +u
 source "$HOME"/.asdf/asdf.sh
 set -u
+
+# update asdf
+asdf update
 
 # Erlang plugin installed
 if [ "$(asdf plugin-list | grep -c 'erlang')" -eq 0 ]; then
