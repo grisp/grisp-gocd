@@ -5,6 +5,7 @@ set -euxo pipefail
 GO_PWD="$PWD"
 
 # workaround for https://github.com/ashwanthkumar/gocd-build-github-pull-requests/issues/133
+cd grisp-software
 GRISP_SOFTWARE_REV=$(git rev-parse HEAD)
 
 rm -rf /opt/grisp
