@@ -83,12 +83,12 @@ fi
 
 
 mkdir "$BUILDDIR"/grisp_release
-cd "$BUILDDIR"/ciproject
+cd "$BUILDDIR"/uid
 
 if [[ "$USE_GRISP_MATERIAL" = true ]]; then
     # link grisp into _checkouts directory
-    mkdir "$BUILDDIR"/ciproject/_checkouts
-    ln -s "$BUILDDIR"/grisp "$BUILDDIR"/ciproject/_checkouts/grisp
+    mkdir "$BUILDDIR"/uid/_checkouts
+    ln -s "$BUILDDIR"/grisp "$BUILDDIR"/uid/_checkouts/grisp
 fi
 
 if [[ "$BUILD_OTP" = true ]]; then
@@ -106,9 +106,9 @@ if [[ "$BUILD_OTP" = true ]]; then
     cp _grisp/otp/*/package/atc_otp_build_*.tar.gz "$BUILDDIR"
 fi
 # deploy release
-DEBUG=1 rebar3 grisp deploy -v 0.1.0 -n ciproject
+DEBUG=1 rebar3 grisp deploy -v 0.1.0 -n uid
 cd "$BUILDDIR"/grisp_release
 tar -czf "$BUILDDIR"/atc_release_"$ERLANG_VERSION".tar.gz .
 
-rm -rf "$BUILDDIR"/grisp_release "$BUILDDIR"/ciproject
+rm -rf "$BUILDDIR"/grisp_release "$BUILDDIR"/uid
 cd "$BUILDDIR"
