@@ -96,7 +96,7 @@ if [[ "$BUILD_OTP" = true ]]; then
     TC_PATH=( /opt/grisp/grisp-software/atc/*/rtems-4.12 )
     erl -noshell -eval '{ok, Config} = file:consult("rebar.config"),
                         {value, {grisp, GrispConfig}} = lists:keysearch(grisp, 1, Config),
-                        NewGrispConfig = GrispConfig ++ [{build, [{toolchain, [{directory, "'${TC_PATH[@]}'"}]}]}],
+                        NewGrispConfig = GrispConfig ++ [{build, [{toolchain, [{directory, "'${TC_PATH[@]}'"}]}]}] ++ [{deploy, [{directory, "'"$BUILDDIR"/grisp_release'"}]}],
                         NewGrispConfig2 = lists:keyreplace(otp, 1, NewGrispConfig, {otp, [{version, "'"$ERLANG_VERSION"'"}]}),
                         NewConfig = lists:keyreplace(grisp, 1, Config, {grisp, NewGrispConfig2}),
                         file:write_file("rebar.config", lists:map(fun (E) -> io_lib:format("~p.~n", [E]) end, NewConfig)).' -s init stop
