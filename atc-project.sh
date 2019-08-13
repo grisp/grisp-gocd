@@ -66,7 +66,7 @@ if [[ "$BUILD_OTP" = true ]]; then
     else
         # fetch master rev from s3
         cd /
-        curl -L https://s3.amazonaws.com/grisp/platforms/grisp_base/toolchain/atc_toolchain_arm-rtems5_Linux_latest.tar.gz | tar -xz
+        curl -L https://s3.amazonaws.com/grisp/platforms/atc/toolchain/atc_toolchain_arm-rtems5_Linux_latest.tar.gz | tar -xz
     fi
 fi
 
