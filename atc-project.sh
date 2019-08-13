@@ -51,7 +51,7 @@ rm -rf ~/.cache/rebar3/
 
 asdf install erlang "$ERLANG_VERSION"
 asdf local erlang "$ERLANG_VERSION"
-asdf local rebar 3.10.0
+asdf local rebar 3.11.1
 
 # install rebar3_grisp globally
 mkdir -p ~/.config/rebar3
