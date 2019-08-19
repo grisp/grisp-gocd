@@ -2,7 +2,7 @@
 
 set -euxo pipefail
 
-for otp in otp/grisp_otp_build_*.tar.gz; do
+for otp in otp/atc_otp_build_*.tar.gz; do
     ARCHIVENAME=$(basename $otp)
     set +o pipefail
     COUNT=$(aws s3 ls s3://grisp/platforms/atc/otp/"$ARCHIVENAME" | wc -l)
