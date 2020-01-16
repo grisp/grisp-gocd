@@ -113,5 +113,9 @@ DEBUG=1 rebar3 grisp deploy -v 0.1.0 -n ciproject
 cd "$BUILDDIR"/grisp_release
 tar -czf "$BUILDDIR"/grisp_release_"$ERLANG_VERSION".tar.gz .
 
+#check edoc
+rebar3 edoc
+
+#cleanup
 rm -rf "$BUILDDIR"/grisp_release "$BUILDDIR"/ciproject
 cd "$BUILDDIR"
